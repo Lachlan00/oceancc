@@ -1,0 +1,8 @@
+Modeling fixes
+
+- scale data for each script
+- change large box to small box
+
+Touchup Todo
+- fix colorbar scale for profile animation
+- add boxes to probability animation for zones? 

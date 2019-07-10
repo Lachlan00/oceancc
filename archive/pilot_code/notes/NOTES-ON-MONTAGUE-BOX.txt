@@ -1,0 +1,19 @@
+ NOTES ON MONTAGUE BOX - now using 200km by 200km
+
+ BOXMAKER RESULTS
+-----------------
+          degrees
+ID               
+north  -35.352688
+south  -37.151332
+east   151.342103
+west   149.111697
+dlon     1.115203
+dlat     0.899322
+
+TEST RESULT (km)
+-----------------
+99.99999999999906 99.99999999999957
+
+There are 1724 ocean points in the array
+

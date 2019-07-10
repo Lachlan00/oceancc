@@ -1,0 +1,39 @@
+
+
+Jan
+Feb
+Mar
+Apr
+May
+Jun
+Jul
+Aug
+Sep
+Oct
+Nov
+Dec
+
+Summer 1-5 & 12 
+------
+Dec
+Jan
+Feb
+Mar
+Apr
+May
+------
+
+
+Winter 6-11
+------
+Jun
+Jul
+Aug
+Sep
+Oct
+Nov
+------
+
+score estimates value
+
+descision_function(X)

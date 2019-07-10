@@ -1,0 +1,498 @@
+File "naroom_avg_02691.nc"
+File type: NetCDF-3/CDM
+ 
+netcdf file:/Users/lachlanphillips/PhD_Large_Data/ROMS/Montague_subset/naroom_avg_02691.nc {
+  dimensions:
+    tracer = 2;
+    s_rho = 30;
+    s_w = 31;
+    boundary = 4;
+    eta_rho = 116;
+    xi_rho = 165;
+    ocean_time = UNLIMITED;   // (30 currently)
+    eta_u = 116;
+    xi_u = 166;
+    eta_v = 116;
+    xi_v = 165;
+    eta_psi = 316;
+    xi_psi = 271;
+    Nuser = 25;
+  variables:
+    double Akk_bak;
+      :long_name = "background vertical mixing coefficient for turbulent energy";
+      :units = "meter2 second-1";
+
+    double Akp_bak;
+      :long_name = "background vertical mixing coefficient for length scale";
+      :units = "meter2 second-1";
+
+    double Akt_bak(tracer=2);
+      :long_name = "background vertical mixing coefficient for tracers";
+      :units = "meter2 second-1";
+
+    double Akv_bak;
+      :long_name = "background vertical mixing coefficient for momentum";
+      :units = "meter2 second-1";
+
+    double Cs_r(s_rho=30);
+      :long_name = "S-coordinate stretching curves at RHO-points";
+      :valid_min = -1.0; // double
+      :valid_max = 0.0; // double
+      :field = "Cs_r, scalar";
+
+    double Cs_w(s_w=31);
+      :long_name = "S-coordinate stretching curves at W-points";
+      :valid_min = -1.0; // double
+      :valid_max = 0.0; // double
+      :field = "Cs_w, scalar";
+
+    double FSobc_in(boundary=4);
+      :long_name = "free-surface inflow, nudging inverse time scale";
+      :units = "second-1";
+
+    double FSobc_out(boundary=4);
+      :long_name = "free-surface outflow, nudging inverse time scale";
+      :units = "second-1";
+
+    double Falpha;
+      :long_name = "Power-law shape barotropic filter parameter";
+
+    double Fbeta;
+      :long_name = "Power-law shape barotropic filter parameter";
+
+    double Fgamma;
+      :long_name = "Power-law shape barotropic filter parameter";
+
+    double M2nudg;
+      :long_name = "2D momentum nudging/relaxation inverse time scale";
+      :units = "day-1";
+
+    double M2obc_in(boundary=4);
+      :long_name = "2D momentum inflow, nudging inverse time scale";
+      :units = "second-1";
+
+    double M2obc_out(boundary=4);
+      :long_name = "2D momentum outflow, nudging inverse time scale";
+      :units = "second-1";
+
+    double M3nudg;
+      :long_name = "3D momentum nudging/relaxation inverse time scale";
+      :units = "day-1";
+
+    double M3obc_in(boundary=4);
+      :long_name = "3D momentum inflow, nudging inverse time scale";
+      :units = "second-1";
+
+    double M3obc_out(boundary=4);
+      :long_name = "3D momentum outflow, nudging inverse time scale";
+      :units = "second-1";
+
+    double Tcline;
+      :long_name = "S-coordinate surface/bottom layer width";
+      :units = "meter";
+
+    double Tnudg(tracer=2);
+      :long_name = "Tracers nudging/relaxation inverse time scale";
+      :units = "day-1";
+
+    double Tobc_in(boundary=4, tracer=2);
+      :long_name = "tracers inflow, nudging inverse time scale";
+      :units = "second-1";
+
+    double Tobc_out(boundary=4, tracer=2);
+      :long_name = "tracers outflow, nudging inverse time scale";
+      :units = "second-1";
+
+    int Vstretching;
+      :long_name = "vertical terrain-following stretching function";
+
+    int Vtransform;
+      :long_name = "vertical terrain-following transformation equation";
+
+    double Znudg;
+      :long_name = "free-surface nudging/relaxation inverse time scale";
+      :units = "day-1";
+
+    double Zob;
+      :long_name = "bottom roughness";
+      :units = "meter";
+
+    double Zos;
+      :long_name = "surface roughness";
+      :units = "meter";
+
+    double angle(eta_rho=116, xi_rho=165);
+      :long_name = "angle between XI-axis and EAST";
+      :units = "radians";
+      :coordinates = "lon_rho lat_rho";
+      :field = "angle, scalar";
+
+    float bustr(ocean_time=30, eta_u=116, xi_u=166);
+      :long_name = "time-averaged bottom u-momentum stress";
+      :units = "newton meter-2";
+      :time = "ocean_time";
+      :coordinates = "lon_u lat_u ocean_time";
+      :field = "bottom u-momentum stress, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    float bvstr(ocean_time=30, eta_v=116, xi_v=165);
+      :long_name = "time-averaged bottom v-momentum stress";
+      :units = "newton meter-2";
+      :time = "ocean_time";
+      :coordinates = "lon_v lat_v ocean_time";
+      :field = "bottom v-momentum stress, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    double dstart;
+      :long_name = "time stamp assigned to model initilization";
+      :units = "days since 1990-01-01 00:00:00";
+
+    double dt;
+      :long_name = "size of long time-steps";
+      :units = "second";
+
+    double dtfast;
+      :long_name = "size of short time-steps";
+      :units = "second";
+
+    double el;
+      :long_name = "domain length in the ETA-direction";
+      :units = "meter";
+
+    double f(eta_rho=116, xi_rho=165);
+      :long_name = "Coriolis parameter at RHO-points";
+      :units = "second-1";
+      :coordinates = "lon_rho lat_rho";
+      :field = "coriolis, scalar";
+
+    double gamma2;
+      :long_name = "slipperiness parameter";
+
+    double h(eta_rho=116, xi_rho=165);
+      :long_name = "bathymetry at RHO-points";
+      :units = "meter";
+      :coordinates = "lon_rho lat_rho";
+      :field = "bath, scalar";
+
+    double hc;
+      :long_name = "S-coordinate parameter, critical depth";
+      :units = "meter";
+
+    double mask_psi(eta_psi=316, xi_psi=271);
+      :long_name = "mask on psi-points";
+      :flag_values = 0.0, 1.0; // double
+      :flag_meanings = "land water";
+      :coordinates = "lon_psi lat_psi";
+
+    double mask_rho(eta_rho=116, xi_rho=165);
+      :long_name = "mask on RHO-points";
+      :flag_values = 0.0, 1.0; // double
+      :flag_meanings = "land water";
+      :coordinates = "lon_rho lat_rho";
+
+    double mask_u(eta_u=116, xi_u=166);
+      :long_name = "mask on U-points";
+      :flag_values = 0.0, 1.0; // double
+      :flag_meanings = "land water";
+      :coordinates = "lon_u lat_u";
+
+    double mask_v(eta_v=116, xi_v=165);
+      :long_name = "mask on V-points";
+      :flag_values = 0.0, 1.0; // double
+      :flag_meanings = "land water";
+      :coordinates = "lon_v lat_v";
+
+    int nAVG;
+      :long_name = "number of time-steps between time-averaged records";
+
+    int nHIS;
+      :long_name = "number of time-steps between history records";
+
+    int nRST;
+      :long_name = "number of time-steps between restart records";
+      :cycle = "only latest two records are maintained";
+
+    int ndefAVG;
+      :long_name = "number of time-steps between the creation of average files";
+
+    int ndefHIS;
+      :long_name = "number of time-steps between the creation of history files";
+
+    int ndtfast;
+      :long_name = "number of short time-steps";
+
+    double nl_tnu2(tracer=2);
+      :long_name = "nonlinear model Laplacian mixing coefficient for tracers";
+      :units = "meter2 second-1";
+
+    double nl_visc2;
+      :long_name = "nonlinear model Laplacian mixing coefficient for momentum";
+      :units = "meter2 second-1";
+
+    int ntimes;
+      :long_name = "number of long time-steps";
+
+    int ntsAVG;
+      :long_name = "starting time-step for accumulation of time-averaged fields";
+
+    double pm(eta_rho=116, xi_rho=165);
+      :long_name = "curvilinear coordinate metric in XI";
+      :units = "meter-1";
+      :coordinates = "lon_rho lat_rho";
+      :field = "pm, scalar";
+
+    double pn(eta_rho=116, xi_rho=165);
+      :long_name = "curvilinear coordinate metric in ETA";
+      :units = "meter-1";
+      :coordinates = "lon_rho lat_rho";
+      :field = "pn, scalar";
+
+    double rdrg;
+      :long_name = "linear drag coefficient";
+      :units = "meter second-1";
+
+    double rdrg2;
+      :long_name = "quadratic drag coefficient";
+
+    double rho0;
+      :long_name = "mean density used in Boussinesq approximation";
+      :units = "kilogram meter-3";
+
+    float salt(ocean_time=30, s_rho=30, eta_rho=116, xi_rho=165);
+      :long_name = "time-averaged salinity";
+      :time = "ocean_time";
+      :coordinates = "lon_rho lat_rho s_rho ocean_time";
+      :field = "salinity, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    float shflux(ocean_time=30, eta_rho=116, xi_rho=165);
+      :long_name = "time-averaged surface net heat flux";
+      :units = "watt meter-2";
+      :negative_value = "upward flux, cooling";
+      :positive_value = "downward flux, heating";
+      :time = "ocean_time";
+      :coordinates = "lon_rho lat_rho ocean_time";
+      :field = "surface heat flux, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    int spherical;
+      :long_name = "grid type logical switch";
+      :flag_values = 0, 1; // int
+      :flag_meanings = "Cartesian spherical";
+
+    float ssflux(ocean_time=30, eta_rho=116, xi_rho=165);
+      :long_name = "time-averaged surface net salt flux, (E-P)*SALT";
+      :units = "meter second-1";
+      :negative_value = "upward flux, freshening (net precipitation)";
+      :positive_value = "downward flux, salting (net evaporation)";
+      :time = "ocean_time";
+      :coordinates = "lon_rho lat_rho ocean_time";
+      :field = "surface net salt flux, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    float sustr(ocean_time=30, eta_u=116, xi_u=166);
+      :long_name = "time-averaged surface u-momentum stress";
+      :units = "newton meter-2";
+      :time = "ocean_time";
+      :coordinates = "lon_u lat_u ocean_time";
+      :field = "surface u-momentum stress, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    float svstr(ocean_time=30, eta_v=116, xi_v=165);
+      :long_name = "time-averaged surface v-momentum stress";
+      :units = "newton meter-2";
+      :time = "ocean_time";
+      :coordinates = "lon_v lat_v ocean_time";
+      :field = "surface v-momentum stress, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    float temp(ocean_time=30, s_rho=30, eta_rho=116, xi_rho=165);
+      :long_name = "time-averaged potential temperature";
+      :units = "Celsius";
+      :time = "ocean_time";
+      :coordinates = "lon_rho lat_rho s_rho ocean_time";
+      :field = "temperature, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    double theta_b;
+      :long_name = "S-coordinate bottom control parameter";
+
+    double theta_s;
+      :long_name = "S-coordinate surface control parameter";
+
+    float u(ocean_time=30, s_rho=30, eta_u=116, xi_u=166);
+      :long_name = "time-averaged u-momentum component";
+      :units = "meter second-1";
+      :time = "ocean_time";
+      :coordinates = "lon_u lat_u s_rho ocean_time";
+      :field = "u-velocity, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    float ubar(ocean_time=30, eta_u=116, xi_u=166);
+      :long_name = "time-averaged vertically integrated u-momentum component";
+      :units = "meter second-1";
+      :time = "ocean_time";
+      :coordinates = "lon_u lat_u ocean_time";
+      :field = "ubar-velocity, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    double user(Nuser=25);
+      :long_name = "user generic parameters";
+      :field = "user, scalar";
+
+    float v(ocean_time=30, s_rho=30, eta_v=116, xi_v=165);
+      :long_name = "time-averaged v-momentum component";
+      :units = "meter second-1";
+      :time = "ocean_time";
+      :coordinates = "lon_v lat_v s_rho ocean_time";
+      :field = "v-velocity, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    float vbar(ocean_time=30, eta_v=116, xi_v=165);
+      :long_name = "time-averaged vertically integrated v-momentum component";
+      :units = "meter second-1";
+      :time = "ocean_time";
+      :coordinates = "lon_v lat_v ocean_time";
+      :field = "vbar-velocity, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    float w(ocean_time=30, s_w=31, eta_rho=116, xi_rho=165);
+      :long_name = "time-averaged vertical momentum component";
+      :units = "meter second-1";
+      :time = "ocean_time";
+      :coordinates = "lon_rho lat_rho s_w ocean_time";
+      :field = "w-velocity, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    double xl;
+      :long_name = "domain length in the XI-direction";
+      :units = "meter";
+
+    float zeta(ocean_time=30, eta_rho=116, xi_rho=165);
+      :long_name = "time-averaged free-surface";
+      :units = "meter";
+      :time = "ocean_time";
+      :coordinates = "lon_rho lat_rho ocean_time";
+      :field = "free-surface, scalar, series";
+      :_FillValue = 1.0E37f; // float
+
+    double lat_psi(eta_psi=316, xi_psi=271);
+      :long_name = "latitude of PSI-points";
+      :units = "degree_north";
+      :standard_name = "latitude";
+      :field = "lat_psi, scalar";
+      :_CoordinateAxisType = "Lat";
+
+    double lat_rho(eta_rho=116, xi_rho=165);
+      :long_name = "latitude of RHO-points";
+      :units = "degree_north";
+      :standard_name = "latitude";
+      :field = "lat_rho, scalar";
+      :_CoordinateAxisType = "Lat";
+
+    double lat_u(eta_u=116, xi_u=166);
+      :long_name = "latitude of U-points";
+      :units = "degree_north";
+      :standard_name = "latitude";
+      :field = "lat_u, scalar";
+      :_CoordinateAxisType = "Lat";
+
+    double lat_v(eta_v=116, xi_v=165);
+      :long_name = "latitude of V-points";
+      :units = "degree_north";
+      :standard_name = "latitude";
+      :field = "lat_v, scalar";
+      :_CoordinateAxisType = "Lat";
+
+    double lon_psi(eta_psi=316, xi_psi=271);
+      :long_name = "longitude of PSI-points";
+      :units = "degree_east";
+      :standard_name = "longitude";
+      :field = "lon_psi, scalar";
+      :_CoordinateAxisType = "Lon";
+
+    double lon_rho(eta_rho=116, xi_rho=165);
+      :long_name = "longitude of RHO-points";
+      :units = "degree_east";
+      :standard_name = "longitude";
+      :field = "lon_rho, scalar";
+      :_CoordinateAxisType = "Lon";
+
+    double lon_u(eta_u=116, xi_u=166);
+      :long_name = "longitude of U-points";
+      :units = "degree_east";
+      :standard_name = "longitude";
+      :field = "lon_u, scalar";
+      :_CoordinateAxisType = "Lon";
+
+    double lon_v(eta_v=116, xi_v=165);
+      :long_name = "longitude of V-points";
+      :units = "degree_east";
+      :standard_name = "longitude";
+      :field = "lon_v, scalar";
+      :_CoordinateAxisType = "Lon";
+
+    double ocean_time(ocean_time=30);
+      :long_name = "averaged time since initialization";
+      :units = "seconds since 1990-01-01 00:00:00";
+      :calendar = "gregorian";
+      :field = "time, scalar, series";
+      :_CoordinateAxisType = "Time";
+
+    double s_rho(s_rho=30);
+      :long_name = "S-coordinate at RHO-points";
+      :valid_min = -1.0; // double
+      :valid_max = 0.0; // double
+      :positive = "up";
+      :standard_name = "ocean_s_coordinate_g2";
+      :formula_terms = "s: s_rho C: Cs_r eta: zeta depth: h depth_c: hc";
+      :field = "s_rho, scalar";
+      :_CoordinateTransformType = "Vertical";
+      :_CoordinateAxes = "s_rho";
+      :_CoordinateAxisType = "GeoZ";
+      :_CoordinateZisPositive = "up";
+
+    double s_w(s_w=31);
+      :long_name = "S-coordinate at W-points";
+      :valid_min = -1.0; // double
+      :valid_max = 0.0; // double
+      :positive = "up";
+      :standard_name = "ocean_s_coordinate_g2";
+      :formula_terms = "s: s_w C: Cs_w eta: zeta depth: h depth_c: hc";
+      :field = "s_w, scalar";
+      :_CoordinateTransformType = "Vertical";
+      :_CoordinateAxes = "s_w";
+      :_CoordinateAxisType = "GeoZ";
+      :_CoordinateZisPositive = "up";
+
+  // global attributes:
+  :file = "outer_avg.nc";
+  :format = "netCDF-3 classic file";
+  :Conventions = "CF-1.4";
+  :type = "ROMS/TOMS averages file";
+  :title = "EAC OUTER GRID";
+  :rst_file = "outer_rst.nc";
+  :avg_file = "outer_avg.nc";
+  :grd_file = "/short/fu5/cgk561/eac/20year_freerun/grid/EACouter_varres_grd_mergedBLbry.nc";
+  :ini_file = "ini.nc";
+  :frc_file_01 = "/short/fu5/cgk561/eac/20year_freerun/ncep/eac_ncep_1994_2016_adjusted_Tair095.nc";
+  :frc_file_02 = "/short/fu5/cgk561/eac/20year_freerun/Qcorrection/qcorr_ncep_bran3p5_1994_2016_adjusted_expanded.nc";
+  :bry_file = "/short/fu5/cgk561/eac/20year_freerun/bluelink/files/bry/EAC_BRAN_bry_20yrs.nc";
+  :script_file = "ocean.in";
+  :svn_url = "https:://myroms.org/svn/src";
+  :svn_rev = "exported";
+  :code_dir = "/home/561/cgk561/roms/src";
+  :header_dir = "/home/561/cgk561/eac/20year_freerun_NEW";
+  :header_file = "eac.h";
+  :os = "Linux";
+  :cpu = "x86_64";
+  :compiler_system = "ifort";
+  :compiler_command = "/apps/openmpi/wrapper/fortran/mpif90";
+  :compiler_flags = "-heap-arrays -fp-model precise -ip -O3 -free";
+  :tiling = "003x004";
+  :history = "Tue Jan 30 13:32:22 2018: ncks -d xi_rho,0,164 -d eta_rho,14,129 -d xi_u,-1,163 -d eta_u,14,129 -d xi_v,0,164 -d eta_v,13,128 /srv/scratch/z3097808/20year_run/20year_freerun_output_NEWnci/outer_avg_02691.nc /srv/scratch/z3097808/20year_run/analysis/Narooma_data//subset_domain_Lachlan/naroom_avg_02691.nc\nROMS/TOMS, Version 3.4, Saturday - July 29, 2017 -  8:56:09 PM";
+  :ana_file = "/home/561/cgk561/eac/20year_freerun_NEW/include/ana_btflux.h, /home/561/cgk561/eac/20year_freerun_NEW/include/ana_hmixcoef.h, /home/561/cgk561/eac/20year_freerun_NEW/include/ana_nudgcoef.h";
+  :CPP_options = "EAC, ANA_BSFLUX, ANA_BTFLUX, ASSUMED_SHAPE, AVERAGES, BULK_FLUXES, CURVGRID, DIFF_GRID, DJ_GRADPS, DOUBLE_PRECISION, EAST_FSCHAPMAN, EAST_M2FLATHER, EAST_M3NUDGING, EAST_M3RADIATION, EAST_TNUDGING, EAST_TRADIATION, EMINUSP, !FULL_GRID, KANTHA_CLAYSON, LONGWAVE_OUT, MASKING, MIX_GEO_TS, MIX_S_UV, MPI, MY25_MIXING, NONLINEAR, NONLIN_EOS, NORTH_FSCHAPMAN, NORTH_M2FLATHER, NORTH_M3NUDGING, NORTH_M3RADIATION, NORTH_TNUDGING, NORTH_TRADIATION, N2S2_HORAVG, OBSERVATIONS, POWER_LAW, PROFILE, QCORRECTION, K_GSCHEME, RADIATION_2D, !RST_SINGLE, SALINITY, SOLAR_SOURCE, SOLVE3D, SOUTH_FSCLAMPED, SOUTH_M2CLAMPED, SOUTH_M3CLAMPED, SOUTH_TCLAMPED, SPONGE, TS_U3HADVECTION, TS_C4VADVECTION, TS_DIF2, UV_ADV, UV_COR, UV_U3HADVECTION, UV_C4VADVECTION, UV_QDRAG, UV_VIS2, VAR_RHO_2D, VISC_GRID, VERIFICATION, WESTERN_WALL";
+  :NCO = "4.2.5";
+  :_CoordSysBuilder = "ucar.nc2.dataset.conv.CF1Convention";
+}

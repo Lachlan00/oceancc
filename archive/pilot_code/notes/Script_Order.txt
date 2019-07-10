@@ -1,0 +1,12 @@
+Script Order
+
+1 - Cars data
+2 - Reigonal stacks and animations
+3- class animation
+3 - Montague Stacks
+4 - Training plot
+5 - Spatial anomalies
+
+Improvements
+- aggragate daily training data
+- 

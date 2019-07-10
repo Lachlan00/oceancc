@@ -1,0 +1,15 @@
+Notes on ROMS nc files for Montague subset
+
+Dimensions
+----------
+165*116*30*30 = 17226000 data points
+165*116 is lat and lon where 30 and 30 is depth and time 
+Y axis = eta_rho (vert - y axis) [116]
+X axis = xi_rho (hori - x axis) [165]
+example = fh.variables['temp'][frame_idx,29,115,164])
+example = fh.variables['temp'][frame_idx,time,eta_rho,xi_rho])
+
+Variables
+----------
+Seems the correct way to load lattitudes and logitudes for salinty and tempertaure is by "lon_rho" and "lat_rho"
+

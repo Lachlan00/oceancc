@@ -1,0 +1,35 @@
+Notes for methods:
+
+target variables
+predictor variables
+binary classification
+
+
+Notes:
+Justify why use salinity and temperature as predictor variables (also time)
+
+- correlation between variables? (salt/temp)
+	- pearson correlation 
+
+Need some validation trainng data (70-30)
+
+Cross Validation
+divde data into folds
+
+Tomorrow's plan
+
+
+- experiemnt with bigger training box
+- write up known patterns detected in analysis
+- make anomaly plots with discriminate score (or find another way to reveal spatial variability)
+- make training variability plot
+- calculate dominance periods (sequence plot) (gradient?) like state sequence plot for HMMs **
+- assess the above in detail (i.e. what month is the pattern)
+- correlation with weather data? (outside of seasonal pattern) (i.e. rain could be significant)
+- correlation with chl-a?
+- comparisons with gemmas paper (SST)
+- 
+
+
+done
+- make monthly averaged stack diagrams
