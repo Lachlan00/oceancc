@@ -104,3 +104,35 @@ def boxmaker(lon_orig, lat_orig, km):
     # export region
     return region
 
+##############################
+# Count points in study zone #
+##############################
+def count_points(lons, lats, region, bath=None, depthmax=1e10):
+    """
+    Passing bathymetry and depthmax is optional
+    """
+    # if no bathymetry data, make bath = lons so depthmax logic is always True
+    if bath is None:
+        bath = lons
+    # make generator of all points
+    point_tuple = zip(lats.ravel(), lons.ravel(), bath.ravel())
+    # iterate over tuple points and keep every point that is in box
+    point_list = []
+    j = 0
+    for i in point_tuple:
+        if region[2] <= i[0] <= region[3] and region[0] <= i[1] <= region[1] and i[2] < depthmax:
+            point_list.append(j)
+        j = j + 1
+
+    # return number of points
+    return len(point_list)
+
+
+
+
+
+
+
+
+
+

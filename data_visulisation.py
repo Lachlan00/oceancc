@@ -50,6 +50,14 @@ def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn=''):
     lats = fh.variables['lat_rho'][:] 
     lons = fh.variables['lon_rho'][:]
     bath = fh.variables['h'][:]
+
+    # Check balance
+    print('Study zone balance (grid cell count)..')
+    for region, i in zip(box_ls, range(1,len(box_ls)+1)):
+        cells = count_points(lons, lats, region, bath, depthmax)
+        print('Box '+str(i)+': '+str(cells))
+
+    # convert bath to km
     bath = bath/1000
 
     # setup map
@@ -81,12 +89,13 @@ def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn=''):
 
     # save plot
     if save:
-        print('Saving plot..')
-        plt.show()
+        print('\nSaving plot..')
         fig.savefig(out_fn)
 
     # show plot
+    print('Close plot to continue..')
     plt.show()
+    plt.close("all")
 
 ###########################################
 # Analyse seasonal variability of current #
