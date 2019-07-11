@@ -77,7 +77,6 @@ def boxmaker(lon_orig, lat_orig, km):
     """
     Calculate points directly north, south, east and 
     west a certain distance from given coordinates
-    Won't handle a c
     """
     # convert decimal degrees to radians
     lon_orig, lat_orig = map(math.radians, [lon_orig, lat_orig])
