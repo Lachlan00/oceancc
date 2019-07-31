@@ -152,16 +152,29 @@ def seasonal_change_analysis(df, title, out_fn):
 
     # report data
     print('\nAnalysis report for "'+title+'"')
-    print('First 5 years: '+str(round(df1.ratioA.mean(),4)))
-    print('Last 5 years: '+str(round(df2.ratioA.mean(),4)))
-    print('Difference: '+str(round(df2.ratioA.mean() - df1.ratioA.mean(),4)))
-    print('Change of '+str(round((df2.ratioA.mean() - df1.ratioA.mean())*12,4))+' months')
+    print('First 5 years: '+str(round(df1.ratioA.mean(),4))+' ('+str(round(df1.ratioA.mean()*12,4))+' months)')
+    print('Last 5 years: '+str(round(df2.ratioA.mean(),4))+' ('+str(round(df2.ratioA.mean()*12,4))+' months)')
+    print('Difference: '+str(round(df2.ratioA.mean() - df1.ratioA.mean(),4))+' ('+
+        str(round((df2.ratioA.mean() - df1.ratioA.mean())*12,4))+' months)')
 
     # save plot
     print('\nMaking plot..')
     plt.show()
     fig.savefig(out_fn)
     plt.close("all")
+
+###########################################################
+# Analyse change in the monthly mean of current influence #
+###########################################################
+def monthly_change_analysis(df, title, out_fn):
+    # calculate ratios
+    df['ratioA'] = [A/(A+B) for A, B in zip(df['countA'], df['countB'])]
+    df['ratioB'] = [B/(A+B) for A, B in zip(df['countA'], df['countB'])]
+    # add date components
+    df['day'] = [x.day for x in df['dt']]
+    df['month'] = [x.month for x in df['dt']]
+    df['year'] = [x.year for x in df['dt']]
+
 
 #########################
 # Merge images together #
@@ -184,6 +197,3 @@ def img_join(output_name, img_ls, direction='vertical'):
         print('Error: invalid direction string.')
 
     print('\nImages joined - saved to: '+output_name)
-
-
-
