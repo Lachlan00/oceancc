@@ -10,6 +10,8 @@ import numpy as np
 from os import listdir
 from os.path import isfile, join
 from netCDF4 import Dataset
+from scipy import stats
+import seaborn as sns
 
 # Hack to fix missing PROJ4 env var for basemap
 import os
@@ -160,13 +162,13 @@ def seasonal_change_analysis(df, title, out_fn):
     # save plot
     print('\nMaking plot..')
     plt.show()
-    fig.savefig(out_fn)
+    fig.savefig(out_fn+'.png')
     plt.close("all")
 
 ###########################################################
 # Analyse change in the monthly mean of current influence #
 ###########################################################
-def monthly_change_analysis(df, title, out_fn):
+def temporal_analysis(df, title, out_fn):
     # calculate ratios
     df['ratioA'] = [A/(A+B) for A, B in zip(df['countA'], df['countB'])]
     df['ratioB'] = [B/(A+B) for A, B in zip(df['countA'], df['countB'])]
@@ -175,6 +177,53 @@ def monthly_change_analysis(df, title, out_fn):
     df['month'] = [x.month for x in df['dt']]
     df['year'] = [x.year for x in df['dt']]
 
+    # montly plot data
+    df_month = df.groupby(['year', 'month']).mean().reset_index()
+    df_month['xtime'] = [datetime(int(x[1]['year']), int(x[1]['month']), 1, 0, 0, 0) for x in df_month.iterrows()]
+
+    # yearly plot data
+    df_year = df_month.groupby(['year']).mean().reset_index()
+    df_year['xtime'] = [datetime(int(x[1]['year']), 1, 1, 0, 0, 0) for x in df_year.iterrows()]
+    # get regression paramaters
+    slope, intercept, r_value, p_value, std_err = stats.linregress(range(0,len(df_year['ratioA'])),df_year['ratioA'])
+
+    # __Monthly_plot__
+    fig, ax = plt.subplots(figsize=(20, 3))
+    plt.grid(ls='dashed', alpha=0.7)
+    x = list(range(0,len(df_month.xtime)))
+    x = [i/12 + df_month.xtime.iloc[0].year for i in x]
+    df_month['x'] = x
+    ax.stackplot(list(df_month['x']), list(df_month['ratioA']), color='#808080')
+    ax.set(xticks=list(range(df_month.xtime.iloc[0].year, df_month.xtime.iloc[-1].year+1, 2)))
+    ax.set_xlim(df_month.xtime.iloc[0].year, df_month.xtime.iloc[-1].year+1)
+    plt.ylabel('Classification Ratio', labelpad=16, size=14)
+    plt.show()
+    fig.savefig(out_fn+'_month.png')
+    plt.close("all")
+
+    # __yearly_means_plot__
+    fig, ax = plt.subplots(figsize=(20, 2))
+    ax.set(xticks=list(range(df_year.xtime.iloc[0].year,df_month.xtime.iloc[-1].year+1,2)))
+    ax.set_xlim(df_year.xtime.iloc[0].year, df_month.xtime.iloc[-1].year+1)
+    ax = sns.regplot(x='year', y="ratioA", data=df_year, color='b', line_kws={'alpha':0.4}, scatter_kws={'alpha':0}, ci=95, truncate=True)
+    ax.set_ylabel('Classification Ratio', labelpad=16, size=14)
+    plt.grid(ls='dashed', alpha=0.7)
+    plt.plot('year', 'ratioA', data=df_year, color='#606060', marker='+', alpha=1)
+    plt.yticks(np.arange(0.2, 0.8, step=0.2))
+    ax.set_ylim(0.1,0.9)
+    plt.title(title, size=15)
+    plt.show()
+    fig.savefig(out_fn+'_year.png')
+    plt.close("all")
+
+    # report line_kws
+    print('\nYeraly mean regression paramaters for '+str(title)+':')
+    print('Slope:'+str(slope))
+    print('Intercept:'+str(intercept))
+    print('R:'+str(r_value))
+
+    # merge plots
+    img_join(out_fn+'.png', [out_fn+'_year.png', out_fn+'_month.png'])
 
 #########################
 # Merge images together #
@@ -182,18 +231,31 @@ def monthly_change_analysis(df, title, out_fn):
 def img_join(output_name, img_ls, direction='vertical'):
     # open images
     images = [PIL.Image.open(i) for i in img_ls]
-    # get smallest image and resizse others
-    min_shape = sorted([(np.sum(i.size), i.size) for i in images])[0][1]
-    imgs_comb = np.hstack((np.asarray( i.resize(min_shape)) for i in images))
-
+    
+    # Resize if needed
     if direction == 'vertical':
-        imgs_comb = np.vstack((np.asarray(i.resize(min_shape)) for i in images))
+        h_ls = [i.size[0] for i in images]
+        if len(set(h_ls)) != 1:
+            print('Width dimensions are not equal.. resizing')
+            min_h = min(h_ls)
+            images = [i.resize((min_h, i.size[1])) for i in images] 
+    if direction == 'horizontal':
+        v_ls = [i.size[1] for i in images]
+        if len(set(v_ls)) != 1:
+            print('Height dimensions are not equal.. resizing')
+            min_v = min(v_ls)
+            images = [i.resize((i.size[0], min_v)) for i in images] 
+
+    # stack
+    if direction == 'vertical':
+        imgs_comb = np.vstack(np.asarray(i) for i in images)
         imgs_comb = PIL.Image.fromarray(imgs_comb)
         imgs_comb.save(output_name)
     elif direction == 'horizontal':
+        imgs_comb = np.hstack(np.asarray(i) for i in images)
         imgs_comb = PIL.Image.fromarray(imgs_comb)
         imgs_comb.save(output_name)    
     else:
-        print('Error: invalid direction string.')
+        print('Error: invalid margin string')
 
     print('\nImages joined - saved to: '+output_name)
