@@ -12,6 +12,7 @@ from os.path import isfile, join
 from netCDF4 import Dataset
 from scipy import stats
 import seaborn as sns
+from scipy.signal import savgol_filter
 
 # Hack to fix missing PROJ4 env var for basemap
 import os
@@ -53,6 +54,11 @@ def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn=''):
     lons = fh.variables['lon_rho'][:]
     bath = fh.variables['h'][:]
 
+    # set title
+    title = 'Analysis Regions'
+    if len(box_ls) == 1:
+        title = 'Analysis Region'
+
     # Check balance
     print('Study zone balance (grid cell count)..')
     for region, i in zip(box_ls, range(1,len(box_ls)+1)):
@@ -69,7 +75,7 @@ def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn=''):
     # make plot
     fig = plt.figure(figsize=(8,8))
     plt.tight_layout()
-    plt.title('Analysis Regions', size=15)
+    plt.title(title, size=15)
     # draw stuff
     m.drawcoastlines(color='black', linewidth=0.7)
     m.fillcontinents(color='#A0A0A0')
@@ -129,10 +135,37 @@ def seasonal_change_analysis(df, title, out_fn):
     base = datetime(2000, 1, 1, 0, 0, 0)
     index = [base + timedelta(int(x)) for x in index]
 
+    # smooth the trend lines
+    smooth_mean = savgol_filter(df_mean['ratioA'], 35, 3)
+    smooth_first = savgol_filter(df1['ratioA'], 35, 3)
+    smooth_last = savgol_filter(df2['ratioA'], 35, 3)
+
+    # calculate the points where the ratio crosses 0.5
+    first_crosses = []
+    last_crosses = []
+    # first
+    for i in range(2, len(index)):
+        if (smooth_first[i] > 0.5 and smooth_first[i-1] < 0.5):
+            first_crosses.append(i)
+        if (smooth_first[i] < 0.5 and smooth_first[i-1] > 0.5):
+            first_crosses.append(i)
+    # last
+    for i in range(2, len(index)):
+        if (smooth_last[i] > 0.5 and smooth_last[i-1] < 0.5):
+            last_crosses.append(i)
+        if (smooth_last[i] < 0.5 and smooth_last[i-1] > 0.5):
+            last_crosses.append(i)
+    # trim if multiple
+    first_crosses = [first_crosses[0], first_crosses[-1]]
+
+    # colors
+    blue = '#0052cc'
+    red = '#e60000'
+
     # make plot
     fig, ax = plt.subplots(figsize=(20, 3))
     plt.grid(ls='dashed', alpha=0.7)
-    ax.stackplot(index, list(df_mean['ratioA']), color='#606060')
+    ax.stackplot(index, list(df_mean['ratioA']), color='#808080')
     # make bands
     ub = df_mean['ratioA'] + df_std['ratioA']
     lb = df_mean['ratioA'] - df_std['ratioA']
@@ -141,8 +174,13 @@ def seasonal_change_analysis(df, title, out_fn):
     # shade between bands
     # plt.fill_between(index, lb, ub, alpha=0.25, color='#4682B4')
     # add first and last 5 year lines
-    plt.plot(index, df1.ratioA, '--', color='b', alpha=0.6)
-    plt.plot(index, df2.ratioA, '--', color='r', alpha=0.6)
+    plt.plot(index, smooth_first, '--', color=blue, alpha=0.6)
+    plt.plot(index, smooth_last, '--', color=red, alpha=0.6)
+    # add corssovers
+    ax.stackplot(index[0:last_crosses[0]], smooth_last[0:last_crosses[0]], color=red, alpha=0.2)
+    ax.stackplot(index[last_crosses[1]:-1], smooth_last[last_crosses[1]:-1], color=red, alpha=0.2)
+    ax.stackplot(index[0:first_crosses[0]], smooth_first[0:first_crosses[0]], color=blue, alpha=0.2)
+    ax.stackplot(index[first_crosses[1]:-1], smooth_first[first_crosses[1]:-1], color=blue, alpha=0.2)
     # title
     plt.ylabel('Classification Ratio', labelpad=16, size = 14)
     plt.title(title, size=15)

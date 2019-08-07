@@ -36,7 +36,7 @@ def current_model(trainData_dir):
 
     # fit logistic regression to the training data and cross validate
     print('Cross validating logistic regression model..')
-    lr_model = LogisticRegressionCV()
+    lr_model = LogisticRegressionCV(cv=10)
     lr_model = lr_model.fit(train_data[['temp','salt','DoY']], np.ravel(train_data[['class']]))
 
     # return model and standardisation data as dictionary
@@ -91,6 +91,7 @@ def analyse_region_counts(ROMS_directory, lr_model, region, depthmax=1e10):
     lats = fh.variables['lat_rho'][:] 
     lons = fh.variables['lon_rho'][:]
     bath = fh.variables['h'][:]
+    ocean_time = fh.variables['ocean_time'][:]
     array_dimensions = lons.shape
 
     # combine lat and lon to list of tuples
@@ -114,7 +115,7 @@ def analyse_region_counts(ROMS_directory, lr_model, region, depthmax=1e10):
     pbar = ProgressBar(max_value=len(file_ls))
     
     # create data frame to hold count data
-    df_count = pd.DataFrame(np.nan, index=range(0,(len(file_ls)+1)*31), columns=['dt', 'countA', 'countB'])
+    df_count = pd.DataFrame(np.nan, index=range(0,(len(file_ls)+1)*len(ocean_time)), columns=['dt', 'countA', 'countB'])
     # extract count data from each netCDF file
     idx = 0
     print('Classifying ocean currents in '+str(len(file_ls))+' netCDF files..')
