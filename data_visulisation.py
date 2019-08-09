@@ -191,11 +191,13 @@ def seasonal_change_analysis(df, title, out_fn):
     ax.set_xlim(datetime(2000, 1, 1),datetime(2000, 12, 31))
 
     # report data
-    print('\nAnalysis report for "'+title+'"')
-    print('First 5 years: '+str(round(df1.ratioA.mean(),4))+' ('+str(round(df1.ratioA.mean()*12,4))+' months)')
-    print('Last 5 years: '+str(round(df2.ratioA.mean(),4))+' ('+str(round(df2.ratioA.mean()*12,4))+' months)')
-    print('Difference: '+str(round(df2.ratioA.mean() - df1.ratioA.mean(),4))+' ('+
-        str(round((df2.ratioA.mean() - df1.ratioA.mean())*12,4))+' months)')
+    print('\nAnalysis report for "'+title+'" (days)')
+    print('First 5 years: '+str(len(df1.ratioA[df1.ratioA > 0.5])))
+    print('Last 5 years: '+str(len(df2.ratioA[df2.ratioA > 0.5])))
+    print('Difference: '+str(len(df2.ratioA[df2.ratioA > 0.5]) - len(df1.ratioA[df1.ratioA > 0.5])))
+    print('Mean dominance period length:'+str(len(df_mean.ratioA[df_mean.ratioA > 0.5])))
+    print('Onset difference: '+str(first_crosses[1] - last_crosses[1]))
+    print('End difference: '+str(first_crosses[0] - last_crosses[0]))
 
     # save plot
     print('\nMaking plot..')
