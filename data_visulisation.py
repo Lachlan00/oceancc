@@ -254,8 +254,8 @@ def temporal_analysis(df, title, out_fn):
     # add regression
     ax = sns.regplot(x='x', y="ratioA", data=df_year, color='#4d4d4d', line_kws={'alpha':0.6}, scatter_kws={'alpha':0}, ci=95, truncate=True)
     # add regression formula
-    plt.text(1994.4, 0.2, 'y = '+str(round(slope, 3))+'*x + '+str(round(intercept, 2)))
-    plt.text(1994.4, 0.1, 'R = '+str(round(r_value, 2)))
+    plt.text(1994.4, 0.2, 'y = '+str('{:.3f}'.format(round(slope, 3)))+'*x + '+str('{:.2f}'.format(round(intercept, 2))))
+    plt.text(1994.4, 0.1, 'R = '+str('{:.2f}'.format(round(r_value, 2))))
     # labels
     plt.ylabel('Classification Ratio', labelpad=16, size=14)
     plt.title(title, size=15)
