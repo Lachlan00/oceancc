@@ -12,8 +12,7 @@ setwd("~/Development/PhD/repos/oceancc")
 # get data
 df_Jerv <- read.csv('./data/count_Jerv.csv')
 df_Jerv$site <- 'Jerv'
-df_Bate <-
-read.csv('./data/count_Bate.csv')
+df_Bate <- read.csv('./data/count_Bate.csv')
 df_Bate$site <- 'Bate'
 df_Howe <- read.csv('./data/count_Howe.csv')
 df_Howe$site <- 'Howe'
@@ -85,4 +84,14 @@ print('\nModel all year means')
 fit <- lm(formula = ratioA ~ dt*site, data = df_year)
 anova(fit)
 TukeyHSD(aov(fit))
+
+# make proper index
+df_year$year <- sapply(df_year$dt, year)
+
+#### Ian's glmmTB method (beta regression model)
+library(glmmTMB)
+fit <- glmmTMB(ratioA ~ 1 + (year | site), data = df_year, family = 'beta_family')
+summary(fit)
+# residual density
+plot(density(resid(fit)))
 

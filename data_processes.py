@@ -3,6 +3,7 @@ import math
 import numpy as np
 from datetime import datetime
 from datetime import timedelta
+import re
 
 #######################
 # Add to list quickly #
@@ -127,6 +128,47 @@ def count_points(lons, lats, region, bath=None, depthmax=1e10):
     # return number of points
     return len(point_list)
 
+###############################
+# Extract digits from strings #
+###############################
+def atoi(text):
+    return int(text) if text.isdigit() else text
+
+###############################
+# Extract digits from strings #
+###############################
+def natural_keys(text):
+    '''
+    alist.sort(key=natural_keys) sorts in human order
+    http://nedbatchelder.com/blog/200712/human_sorting.html
+    (See Toothy's implementation in the comments)
+    '''
+    return [atoi(c) for c in re.split(r'(\d+)', text)]
+
+##############
+# RatioA mean #
+##############
+def mean_ratioA(df):
+    # calculate ratios
+    df['ratioA'] = [A/(A+B) for A, B in zip(df['countA'], df['countB'])]
+    # add date components
+    df['day'] = [x.day for x in df['dt']]
+    df['month'] = [x.month for x in df['dt']]
+    df['year'] = [x.year for x in df['dt']]
+
+    # Seasonal data
+    df = df[df.year != 2016] # drop 2016 (incomplete)
+    # calc yearly means
+    df_std = df.groupby(['month', 'day']).std().reset_index()
+    df_mean = df.groupby(['month', 'day']).mean().reset_index()
+
+    # build index
+    index = df_mean.index
+    base = datetime(2000, 1, 1, 0, 0, 0)
+    index = [base + timedelta(int(x)) for x in index]
+    df_mean['index'] = index
+
+    return df_mean
 
 
 

@@ -15,19 +15,21 @@ from data_processes import *
 ###################################
 # Build logistic regression model #
 ###################################
-def current_model(trainData_dir):
+def current_model(trainData_dir, verbose=True):
     """
     Build current logistic regression classifier
     """
-    print('\nBuilding ocean current classification model.')
-    print('loading dataset..')
+    if verbose:
+        print('\nBuilding ocean current classification model.')
+        print('loading dataset..')
     train_data = pd.read_csv(trainData_dir, parse_dates = ['datetime'],
                             infer_datetime_format = True)
     # add "day of year" (DoY) to dataset 
     train_data['DoY'] = [int(x.day) for x in train_data['datetime']]
 
     # standardise data and get fits to be used for later scaling
-    print('Standardising data..')
+    if verbose:
+        print('Standardising data..')
     scaler_temp = preprocessing.StandardScaler().fit(train_data[['temp']])
     scaler_salt = preprocessing.StandardScaler().fit(train_data[['salt']])
     # scale training dataset
@@ -35,9 +37,19 @@ def current_model(trainData_dir):
     train_data['salt'] = scaler_salt.transform(train_data[['salt']])
 
     # fit logistic regression to the training data and cross validate
-    print('Cross validating logistic regression model..')
+    if verbose:
+        print('Cross validating logistic regression model..')
     lr_model = LogisticRegressionCV(cv=10)
     lr_model = lr_model.fit(train_data[['temp','salt','DoY']], np.ravel(train_data[['class']]))
+
+    # report model feature importance
+    if verbose:
+        print('Model coeffecients')
+        print(lr_model.coef_)
+        print('Temp * SD')
+        print(np.std(np.asarray(train_data['temp']), 0)*lr_model.coef_[0][0])
+        print('Salt * SD')
+        print(np.std(np.asarray(train_data['salt']), 0)*lr_model.coef_[0][1])
 
     # return model and standardisation data as dictionary
     return({"lr_model": lr_model, "scaler_temp": scaler_temp, "scaler_salt": scaler_salt})

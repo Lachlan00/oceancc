@@ -139,6 +139,26 @@ def train_CARS(input_directory, output_directory, sourceboxA, sourceboxB, plot_b
     print('Extracting data from CARS model')
     pbar = ProgressBar(max_value=365)
     pbar.update(0)
+
+    # BOX A
+    # get values inside box A
+    point_zip = zip(lats.ravel(), lons.ravel())
+    point_listA = []
+    j = 0
+    for i in point_zip:
+        if ymin1 <= i[0] <= ymax1 and xmin1 <= i[1] <= xmax1:
+            point_listA.append(j)
+        j += 1
+
+     # BOX B
+    # get values inside box B
+    point_zip = zip(lats.ravel(), lons.ravel())
+    point_listB = []
+    j = 0
+    for i in point_zip:
+        if ymin2 <= i[0] <= ymax2 and xmin2 <= i[1] <= xmax2:
+            point_listB.append(j)
+        j += 1
     
     # iterate through each modelled day in CARS and get data
     for k in range (1, 366):
@@ -150,20 +170,11 @@ def train_CARS(input_directory, output_directory, sourceboxA, sourceboxB, plot_b
         T = T_mean + T_an_cos*math.cos(t) + T_an_sin*math.sin(t) + T_sa_cos*math.cos(2*t) + T_sa_sin*math.sin(2*t)
         S = S_mean + S_an_cos*math.cos(t) + S_an_sin*math.sin(t) + S_sa_cos*math.cos(2*t) + S_sa_sin*math.sin(2*t)
 
-        # BOX A
-        # get values inside box A
-        point_zip = zip(lats.ravel(), lons.ravel())
-        point_list = []
-        j = 0
-        for i in point_zip:
-            if ymin1 <= i[0] <= ymax1 and xmin1 <= i[1] <=xmax1:
-                point_list.append(j)
-            j += 1
-        # convert to grid coordinates
+        # A - convert to grid coordinates
         lon_grid = []
         lat_grid = []
         j = 0
-        for i in point_list:
+        for i in point_listA:
             lon_grid = add(lon_grid, int(i%721), j)
             lat_grid = add(lat_grid, int(i/721), j)
         # get salinity and temperature data
@@ -174,20 +185,11 @@ def train_CARS(input_directory, output_directory, sourceboxA, sourceboxB, plot_b
         dfA['datetime'] = dt
         dfA['class'] = 'A'
 
-        # BOX B
-        # get values inside box B
-        point_zip = zip(lats.ravel(), lons.ravel())
-        point_list = []
-        j = 0
-        for i in point_zip:
-            if ymin2 <= i[0] <= ymax2 and xmin2 <= i[1] <=xmax2:
-                point_list.append(j)
-            j += 1
-        # convert to grid coordinates
+        # B - convert to grid coordinates
         lon_grid = []
         lat_grid = []
         j = 0
-        for i in point_list:
+        for i in point_listB:
             lon_grid = add(lon_grid, int(i%721), j)
             lat_grid = add(lat_grid, int(i/721), j)
         # get salinity and temperature data

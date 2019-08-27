@@ -14,6 +14,7 @@ from scipy import stats
 import seaborn as sns
 from scipy.signal import savgol_filter
 from sklearn.linear_model import LinearRegression
+import itertools,operator
 
 # Hack to fix missing PROJ4 env var for basemap
 import os
@@ -26,6 +27,20 @@ from mpl_toolkits.basemap import Basemap
 
 # local modules
 from data_processes import *
+
+def cmocean2rgb(cmap, n):
+    """
+    Function to convert cmocean colormaps to be compatible with plotly
+    """
+    h = 1.0/(n-1)
+    pl_colorscale = []
+    for k in range(n):
+        C = np.array(cmap(k*h)[:3])*255
+        pl_colorscale.append([k*h, 'rgb'+str((C[0], C[1], C[2]))])
+    return pl_colorscale
+
+def clamp(x): 
+  return max(0, min(x, 255))
 
 ################
 # plot polygon #
@@ -137,27 +152,78 @@ def seasonal_change_analysis(df, title, out_fn):
     index = [base + timedelta(int(x)) for x in index]
 
     # smooth the trend lines
-    smooth_mean = savgol_filter(df_mean['ratioA'], 35, 3)
-    smooth_first = savgol_filter(df1['ratioA'], 35, 3)
-    smooth_last = savgol_filter(df2['ratioA'], 35, 3)
+    # duplicate signal so trend is smoothed properly across end and start cyle
+    smooth_first = list(df1['ratioA'])*3
+    smooth_last = list(df2['ratioA'])*3
+    # run Savgol Filter
+    smooth_first = savgol_filter(smooth_first, 35, 3)
+    smooth_last = savgol_filter(smooth_last, 35, 3)
+    # retrim to original dataset
+    smooth_first = smooth_first[len(df1['ratioA']):len(df1['ratioA'])*2]
+    smooth_last = smooth_last[len(df2['ratioA']):len(df2['ratioA'])*2]
 
     # calculate the points where the ratio crosses 0.5
-    first_crosses = []
-    last_crosses = []
+    first_crosses_up = []
+    first_crosses_dw = []
+    last_crosses_up = []
+    last_crosses_dw = []
     # first
     for i in range(2, len(index)):
         if (smooth_first[i] > 0.5 and smooth_first[i-1] < 0.5):
-            first_crosses.append(i)
+            first_crosses_up.append(i)
         if (smooth_first[i] < 0.5 and smooth_first[i-1] > 0.5):
-            first_crosses.append(i)
+            first_crosses_dw.append(i)
     # last
     for i in range(2, len(index)):
         if (smooth_last[i] > 0.5 and smooth_last[i-1] < 0.5):
-            last_crosses.append(i)
+            last_crosses_up.append(i)
         if (smooth_last[i] < 0.5 and smooth_last[i-1] > 0.5):
-            last_crosses.append(i)
-    # trim if multiple
-    first_crosses = [first_crosses[0], first_crosses[-1]]
+            last_crosses_dw.append(i)
+    
+    # merge sets
+    first_crosses = first_crosses_up + first_crosses_dw
+    first_crosses.sort()
+    last_crosses = last_crosses_up + last_crosses_dw
+    last_crosses.sort()
+    # correct for start and end
+    if first_crosses_dw[0] < first_crosses_up[0]:
+        first_crosses = [0] + first_crosses
+    if first_crosses_up[-1] > first_crosses_dw[-1]:
+        first_crosses = first_crosses + [366]
+    if last_crosses_dw[0] < last_crosses_up[0]:
+        last_crosses = [0] + last_crosses
+    if last_crosses_up[-1] > last_crosses_dw[-1]:
+        last_crosses = last_crosses + [366]
+    # convert into tuples
+    first_crosses_tuple = zip(first_crosses[0::2], first_crosses[1::2])
+    last_crosses_tuple = zip(last_crosses[0::2], last_crosses[1::2])
+
+    # calculate difference in onset and offset of EAC
+    # "+ 1" to values becuase index is zero indexed and not the actual day of the year
+    # first
+    mask = smooth_first < 0.5
+    boolcount = np.bincount((~mask).cumsum()[mask])
+    first_offon = max((list(y) for (x,y) in itertools.groupby((enumerate(mask)),operator.itemgetter(1)) if x), key=len)
+    first_start = first_offon[-1][0] + 1
+    first_end = first_offon[0][0] + 1
+    # correct start if beyond 365
+    if first_start == 366:
+        mask = smooth_first > 0.5
+        boolcount = np.bincount((~mask).cumsum()[mask])
+        first_offon = max((list(y) for (x,y) in itertools.groupby((enumerate(mask)),operator.itemgetter(1)) if x), key=len)
+        first_start = first_offon[0][0] + 1 + 366
+    # last
+    mask = smooth_last < 0.5
+    boolcount = np.bincount((~mask).cumsum()[mask])
+    last_offon = max((list(y) for (x,y) in itertools.groupby((enumerate(mask)),operator.itemgetter(1)) if x), key=len)
+    last_start = last_offon[-1][0] + 1
+    last_end = last_offon[0][0] + 1
+    # correct start if beyond 366 (last day of year)
+    if last_start == 366:
+        mask = smooth_last > 0.5
+        boolcount = np.bincount((~mask).cumsum()[mask])
+        last_offon = max((list(y) for (x,y) in itertools.groupby((enumerate(mask)),operator.itemgetter(1)) if x), key=len)
+        last_start = last_offon[0][0] + 1 + 366
 
     # colors
     blue = '#0052cc'
@@ -178,10 +244,11 @@ def seasonal_change_analysis(df, title, out_fn):
     plt.plot(index, smooth_first, '--', color=blue, alpha=0.6)
     plt.plot(index, smooth_last, '--', color=red, alpha=0.6)
     # add corssovers
-    ax.stackplot(index[0:last_crosses[0]], smooth_last[0:last_crosses[0]], color=red, alpha=0.2)
-    ax.stackplot(index[last_crosses[1]:-1], smooth_last[last_crosses[1]:-1], color=red, alpha=0.2)
-    ax.stackplot(index[0:first_crosses[0]], smooth_first[0:first_crosses[0]], color=blue, alpha=0.2)
-    ax.stackplot(index[first_crosses[1]:-1], smooth_first[first_crosses[1]:-1], color=blue, alpha=0.2)
+    for cross in last_crosses_tuple:
+        ax.stackplot(index[cross[0]:cross[1]], smooth_last[cross[0]:cross[1]], color=red, alpha=0.2)
+    for cross in first_crosses_tuple:
+        ax.stackplot(index[cross[0]:cross[1]], smooth_first[cross[0]:cross[1]], color=blue, alpha=0.2)
+
     # title
     plt.ylabel('Classification Ratio', labelpad=16, size = 14)
     plt.title(title, size=15)
@@ -197,8 +264,8 @@ def seasonal_change_analysis(df, title, out_fn):
     print('Last 5 years: '+str(len(df2.ratioA[df2.ratioA > 0.5])))
     print('Difference: '+str(len(df2.ratioA[df2.ratioA > 0.5]) - len(df1.ratioA[df1.ratioA > 0.5])))
     print('Mean dominance period length:'+str(len(df_mean.ratioA[df_mean.ratioA > 0.5])))
-    print('Onset difference: '+str(first_crosses[1] - last_crosses[1]))
-    print('End difference: '+str(first_crosses[0] - last_crosses[0]))
+    print('Current Start difference: '+str(last_start - first_start))
+    print('Current End difference: '+str(last_end - first_end))
 
     # save plot
     print('\nMaking plot..')
@@ -252,10 +319,11 @@ def temporal_analysis(df, title, out_fn):
     ax.set(xticks=list(range(df_month.xtime.iloc[0].year, df_month.xtime.iloc[-1].year+1, 2)))
     ax.set_xlim(df_month.xtime.iloc[0].year, df_month.xtime.iloc[-1].year+1)
     # add regression
-    ax = sns.regplot(x='x', y="ratioA", data=df_year, color='#4d4d4d', line_kws={'alpha':0.6}, scatter_kws={'alpha':0}, ci=95, truncate=True)
+    plt.plot(df_year['x'], df_year['ratioA'], color='#4d4d4d', alpha=0.4)
+    ax = sns.regplot(x='x', y="ratioA", data=df_year, color='#4d4d4d', line_kws={'alpha':0.7}, scatter_kws={'alpha':0.4}, ci=95, truncate=True)
     # add regression formula
-    plt.text(1994.4, 0.2, 'y = '+str('{:.3f}'.format(round(slope, 3)))+'*x + '+str('{:.2f}'.format(round(intercept, 2))))
-    plt.text(1994.4, 0.1, 'R = '+str('{:.2f}'.format(round(r_value, 2))))
+    plt.text(1994.4, 0.95, 'y = '+str('{:.3f}'.format(round(slope, 3)))+'*x + '+str('{:.2f}'.format(round(intercept, 2))))
+    plt.text(1994.4, 0.85, 'R = '+str('{:.2f}'.format(round(r_value, 2))))
     # labels
     plt.ylabel('Classification Ratio', labelpad=16, size=14)
     plt.title(title, size=15)
