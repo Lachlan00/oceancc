@@ -7,7 +7,7 @@ import json
 #__Config__ #
 #############
 # Analysis name
-name = 'EAC-Box-N'
+name = 'TAS-Box-N'
 
 #############
 # read meta #

@@ -45,20 +45,20 @@ def clamp(x):
 ################
 # plot polygon #
 ################
-def make_polygon(region, m):
+def make_polygon(region, m, edgecolor='#e60000'):
     x1,y1 = m(region[0],region[2]) 
     x2,y2 = m(region[0],region[3]) 
     x3,y3 = m(region[1],region[3]) 
     x4,y4 = m(region[1],region[2])
     p = Polygon([(x1,y1),(x2,y2),(x3,y3),(x4,y4)], facecolor='none',
-                edgecolor='#ff0000',linewidth=2,ls='dashed', zorder=10)
+                edgecolor=edgecolor,linewidth=2,ls='dashed', zorder=10)
 
     return(p)
 
 ###############################################
 # Check box positions relative to ROMS extent #
 ###############################################
-def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn=''):
+def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn='FIG.png', labels=None, title=None):
     print('\nChecking analysis regions..')
     file_ls = [f for f in listdir(ROMS_directory) if isfile(join(ROMS_directory, f))]
     file_ls = list(filter(lambda x:'.nc' in x, file_ls))
@@ -69,11 +69,6 @@ def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn=''):
     lats = fh.variables['lat_rho'][:] 
     lons = fh.variables['lon_rho'][:]
     bath = fh.variables['h'][:]
-
-    # set title
-    title = 'Analysis Regions'
-    if len(box_ls) == 1:
-        title = 'Analysis Region'
 
     # Check balance
     print('Study zone balance (grid cell count)..')
@@ -91,7 +86,9 @@ def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn=''):
     # make plot
     fig = plt.figure(figsize=(8,8))
     plt.tight_layout()
-    plt.title(title, size=15)
+    # set title
+    if not title is None:
+        plt.title(title, size=15)
     # draw stuff
     m.drawcoastlines(color='black', linewidth=0.7)
     m.fillcontinents(color='#A0A0A0')
@@ -102,7 +99,7 @@ def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn=''):
     m.drawmeridians(meridians,labels=[True,False,False,True], linewidth=1, dashes=[3,3], color='#707070')
     # add bathymetry extent
     cs = m.pcolor(lons, lats, np.squeeze(bath), latlon=True ,vmin=0, vmax=5, cmap=cmocean.cm.deep)
-    cbar = plt.colorbar(ticks=np.arange(6))
+    cbar = plt.colorbar(ticks=np.arange(6), pad=0.05, shrink=0.95)
     CS = m.contour(lons, lats, np.squeeze(bath), [depthmax/1000], colors='k', latlon=True, linestyles='dashed', alpha=0.9)
     cbar.ax.invert_yaxis()
     cbar.ax.set_ylabel('Depth (km)', rotation=270, labelpad=16, size=12)
@@ -111,10 +108,117 @@ def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn=''):
     for i in range(0, len(box_ls)): 
          plt.gca().add_patch(make_polygon(box_ls[i], m))
 
-    # save plot
+    # add labels
+    for region, label in zip(box_ls, labels):
+        x, y = m(region[0],region[3]-(region[3]-region[2])/2)
+        x = x - 23000
+        txt = plt.text(x, y, label+' '+u'\u25B6', size=8.5, ha='right', alpha=0.8)
+        txt.set_bbox(dict(facecolor='#e6e6e6', alpha=0.5, edgecolor='#e6e6e6'))
+
+    # save plots
     if save:
         print('\nSaving plot..')
-        fig.savefig(out_fn)
+        fig.savefig(out_fn, dpi=300)
+
+    # show plot
+    print('Close plot to continue..')
+    plt.show()
+    plt.close("all")
+
+##############
+# Map inset #
+##############
+def map_inset(ROMS_directory, save=True, out_fn='map_inset.png', eac_panel_inset=False):
+    file_ls = [f for f in listdir(ROMS_directory) if isfile(join(ROMS_directory, f))]
+    file_ls = list(filter(lambda x:'.nc' in x, file_ls))
+    file_ls = sorted(file_ls)
+    # obtain bathymetry data
+    nc_file = ROMS_directory + '/' + file_ls[0]
+    fh = Dataset(nc_file, mode='r')
+    lats = fh.variables['lat_rho'][:] 
+    lons = fh.variables['lon_rho'][:]
+    # setup map
+    m = Basemap(projection='merc', llcrnrlat=lats.min()-6, urcrnrlat=lats.max()+26,\
+        llcrnrlon=lons.min()-37, urcrnrlon=lons.max()+12, lat_ts=20, resolution='h')
+
+    # make plot
+    fig = plt.figure(figsize=(2,2))
+    #splt.tight_layout()
+    # draw stuff
+    m.drawcoastlines(color='black', linewidth=0.7)
+    m.fillcontinents(color='#A0A0A0')
+    # add grid
+    parallels = np.arange(-81.,0,15.)
+    m.drawparallels(parallels,labels=[True,False,False,True], linewidth=1, dashes=[3,3], color='#707070')
+    meridians = np.arange(10.,351.,20.)
+    m.drawmeridians(meridians,labels=[True,False,False,True], linewidth=1, dashes=[3,3], color='#707070')
+    # add polygon
+    if eac_panel_inset:
+        plt.gca().add_patch(make_polygon([lons.min()-6,lons.max()+10,lats.min()-5,lats.max()+10], m))
+    else:
+        plt.gca().add_patch(make_polygon([lons.min()-1,lons.max()+1,lats.min()-1,lats.max()+1], m))
+
+    plt.gcf().subplots_adjust(left=0.25)
+    # save plots
+    if save:
+        print('\nSaving plot..')
+        fig.savefig(out_fn, dpi=300, transparent=True)
+
+    # show plot
+    print('Close plot to continue..')
+    plt.show()
+    plt.close("all")
+
+##################
+# EAC panel base #
+##################
+def eac_panel(ROMS_directory, save=True, out_fn='map_inset.png', 
+    SST_fn='/Volumes/LP_MstrData/master-data/ocean/NOAA/sst.day.mean.2000.nc'):
+    file_ls = [f for f in listdir(ROMS_directory) if isfile(join(ROMS_directory, f))]
+    file_ls = list(filter(lambda x:'.nc' in x, file_ls))
+    file_ls = sorted(file_ls)
+    # obtain bathymetry data
+    nc_file = ROMS_directory + '/' + file_ls[0]
+    fh = Dataset(nc_file, mode='r')
+    lats = fh.variables['lat_rho'][:] 
+    lons = fh.variables['lon_rho'][:]
+    # get SST
+    fh = Dataset(SST_fn, mode='r')
+    sst = fh.variables['sst'][345,:,:] 
+    sst_lat = fh.variables['lat'][:]
+    sst_lon = fh.variables['lon'][:]
+    # tile the arrays to have coords for each grid cell
+    sst_lat = np.asarray([np.tile(lat, sst.shape[1]) for lat in sst_lat])
+    sst_lon = np.asarray(([sst_lon]*sst.shape[0]))
+    # setup map
+    m = Basemap(projection='merc', llcrnrlat=lats.min()-5, urcrnrlat=lats.max()+10,\
+        llcrnrlon=lons.min()-6, urcrnrlon=lons.max()+10, lat_ts=20, resolution='h')
+
+    # make plot
+    fig = plt.figure(figsize=(7,7))
+    ax = fig.add_subplot(111)
+    #plt.tight_layout()
+    # draw stuff
+    m.drawcoastlines(color='black', linewidth=0.7)
+    m.fillcontinents(color='#A0A0A0')
+    # add grid
+    parallels = np.arange(-80.,0,8.)
+    m.drawparallels(parallels,labels=[False,True,False,True], linewidth=1, dashes=[3,3], color='#707070')
+    meridians = np.arange(10.,351.,5.)
+    m.drawmeridians(meridians,labels=[True,False,False,True], linewidth=1, dashes=[3,3], color='#707070')
+    # add sst
+    cs = m.pcolor(sst_lon, sst_lat, np.squeeze(sst), latlon=True ,vmin=12, vmax=28, cmap=cmocean.cm.thermal)
+    #cbaxes = fig.add_axes([0.165, 0.11, 0.045, .7703])  # Position for the colorbar [left, bottom, width, height]
+    cbar = plt.colorbar(pad=0.05, shrink=0.915, ax=[ax], location='left')
+    cbar.ax.set_ylabel('Sea Surface Temperature (°C)', rotation=90, labelpad=16, size=12)
+    cbar.ax.yaxis.set_ticks_position('left')
+    cbar.ax.yaxis.set_label_position('left')
+    # add polygon
+    #plt.gca().add_patch(make_polygon([lons.min()-1,lons.max()+1,lats.min()-1,lats.max()+1], m))
+    # save plots
+    if save:
+        print('\nSaving plot..')
+        fig.savefig(out_fn, dpi=300, transparent=True)
 
     # show plot
     print('Close plot to continue..')
@@ -317,10 +421,10 @@ def temporal_analysis(df, title, out_fn):
     plt.grid(ls='dashed', alpha=0.7)
     ax.stackplot(list(df_month['x']), list(df_month['ratioA']), color='#bfbfbf')
     ax.set(xticks=list(range(df_month.xtime.iloc[0].year, df_month.xtime.iloc[-1].year+1, 2)))
-    ax.set_xlim(df_month.xtime.iloc[0].year, df_month.xtime.iloc[-1].year+1)
+    ax.set_xlim(df_month.xtime.iloc[0].year-1, df_month.xtime.iloc[-1].year+1)
     # add regression
-    plt.plot(df_year['x'], df_year['ratioA'], color='#4d4d4d', alpha=0.4)
-    ax = sns.regplot(x='x', y="ratioA", data=df_year, color='#4d4d4d', line_kws={'alpha':0.7}, scatter_kws={'alpha':0.4}, ci=95, truncate=True)
+    plt.plot(df_year['x'], df_year['ratioA'], color='#246cb9', alpha=0.6)
+    ax = sns.regplot(x='x', y="ratioA", data=df_year, color='#3785d8', line_kws={'alpha':0.7}, scatter_kws={'alpha':0.4}, ci=95, truncate=True)
     # add regression formula
     plt.text(1994.4, 0.95, 'y = '+str('{:.3f}'.format(round(slope, 3)))+'*x + '+str('{:.2f}'.format(round(intercept, 2))))
     plt.text(1994.4, 0.85, 'R = '+str('{:.2f}'.format(round(r_value, 2))))

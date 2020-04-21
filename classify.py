@@ -8,6 +8,7 @@ from os import listdir
 from os.path import isfile, join
 from netCDF4 import Dataset
 from progressbar import ProgressBar
+import os
 
 # user defined modules
 from data_processes import *
@@ -87,10 +88,16 @@ def current_prob_count(lr_model, fh, frame_time, frame_idx, eta_rho, xi_rho):
 ###############################
 # Compute regional count data #
 ###############################
-def analyse_region_counts(ROMS_directory, lr_model, region, depthmax=1e10):
+def analyse_region_counts(ROMS_directory, lr_model, region, depthmax=1e10, name_check='NA'):
     """
     depthmax in meters (arbitarily large by default)
     """
+    if os.path.exists('./data/'+name_check):
+        if yes_or_no('"./data/'+name_check+'" already exists. Would you like to produce a new training dataset?'):
+            print('"./data/'+name_check+'" will be overwirtten.')
+        else:
+            print('Using previously extracted dataset.')
+            return
     print('\nExtracting current classification count data..')
     # get ROMS netCDF file list
     file_ls = [f for f in listdir(ROMS_directory) if isfile(join(ROMS_directory, f))]
@@ -98,7 +105,7 @@ def analyse_region_counts(ROMS_directory, lr_model, region, depthmax=1e10):
     file_ls = sorted(file_ls)
 
     # get lats and lons
-    nc_file = ROMS_directory + '/' + file_ls[0]
+    nc_file = ROMS_directory + file_ls[0]
     fh = Dataset(nc_file, mode='r')
     lats = fh.variables['lat_rho'][:] 
     lons = fh.variables['lon_rho'][:]
@@ -153,11 +160,4 @@ def analyse_region_counts(ROMS_directory, lr_model, region, depthmax=1e10):
 
     # drop NaNs and return dataset
     return(df_count.dropna())
-
-
-
-
-
-
-
 

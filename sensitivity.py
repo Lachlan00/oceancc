@@ -16,6 +16,7 @@ import seaborn as sns
 import joypy
 from datetime import datetime
 from netCDF4 import Dataset
+from colormap import rgb2hex
 
 from train import *
 from classify import *
@@ -159,8 +160,8 @@ def sensitivity_analysisMap(name, CARS_directory, sourcebox_modA, sourcebox_modB
     # colour scale
     z = np.arange(1, len(boxAmod)+1, 1)
     # make ploygon collections
-    collA = PolyCollection(verts=vertsA, array=z, cmap=cmocean.cm.gray_r, facecolor='none', edgecolor='black')
-    collB = PolyCollection(verts=vertsB, array=z, cmap=cmocean.cm.gray_r, facecolor='none', edgecolor='black')
+    collA = PolyCollection(verts=vertsA, array=z, cmap=cmocean.cm.haline, facecolor='none', edgecolor='black')
+    collB = PolyCollection(verts=vertsB, array=z, cmap=cmocean.cm.haline, facecolor='none', edgecolor='black')
     # add to plot
     plt.gca().add_collection(collA)
     plt.gca().add_collection(collB)
@@ -224,7 +225,7 @@ def sensitivity_analysisJoy(name, data_directory, iterations=10, save=False):
 
     # joyploy
     x_range = list(range(366))
-    fig, axes = joypy.joyplot(df, by="g", colormap=cmocean.cm.gray_r, kind='values', 
+    fig, axes = joypy.joyplot(df, by="g", colormap=cmocean.cm.haline, kind='values', 
         x_range=x_range, labels=['']*iterations, overlap=3, grid='y', alpha=1)
 
     # edit axis
@@ -269,10 +270,10 @@ def sensitivity_analysisLine(name, data_directory, iterations, save=False):
         df['ratioA_smooth'] = savgol_filter(df['ratioA'], 35, 3)
 
     # make plot
-    fig, ax = plt.subplots(figsize=(20, 3))
+    fig, ax = plt.subplots(figsize=(12, 3))
     plt.grid(ls='dashed', alpha=0.7)
     # add lines
-    cmaps = cmocean2rgb(cmocean.cm.thermal, len(data))
+    cmaps = cmocean2rgb(cmocean.cm.haline, len(data))
     cmaps = [x[1] for x in cmaps]
     cmaps = [eval(x.strip('rgb')) for x in cmaps]
     cmaps = [tuple(int(x) for x in cmap) for cmap in cmaps]
@@ -280,6 +281,15 @@ def sensitivity_analysisLine(name, data_directory, iterations, save=False):
 
     for df, cmap in zip(data, cmaps):
         plt.plot(df['index'], df['ratioA_smooth'], color=cmap, alpha=0.6)
+
+    if save:
+        print('\nSaving plot..')
+        fig.savefig('./data/sensitivity/'+name+'/plots/sensitivity_joy.png')
+
+    # show plot
+    print('Close plot to continue..')
+    plt.show()
+    plt.close("all")
 
 
 

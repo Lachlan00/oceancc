@@ -9,10 +9,10 @@ import json
 #__Config__ #
 #############
 # Analysis name
-name = 'EAC-Box-E'
+name = 'EAC-Box-N'
 # directories
 CARS_directory = '/Users/lachlanphillips/PhD_Large_Data/CARS/'
-ROMS_directory = '/Users/lachlanphillips/PhD_Large_Data/ROMS/Montague_subset/'
+ROMS_directory = '/Volumes/LP_MstrData/master-data/ocean/ROMS/Montague_subset/'
 # Training sources
 sourceboxA = [153.5, 155.5, -27.5, -24]
 sourceboxB = [155, 160, -46, -41]
@@ -21,9 +21,9 @@ region = boxmaker(150.2269, -36.25201, 50)
 
 #__Modification
 modA_NS = 'NA'
-modA_EW = 'E'
+modA_EW = 'NA'
 modB_NS = 'NA'
-modB_EW = 'NA'
+modB_EW = 'E'
 increment = 0.5
 iterations = 5
 
@@ -32,6 +32,9 @@ iterations = 5
 ###################
 sourcebox_modA = boxMod(sourceboxA, increment, iterations, modA_NS, modA_EW)
 sourcebox_modB = boxMod(sourceboxB, increment, iterations, modB_NS, modB_EW)
+
+# check name
+print(name)
 
 ################################
 # Get sensitvity training data #
