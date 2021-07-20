@@ -1,3 +1,7 @@
+**/__pycache__
 data/sensitivity
 data/training_data_jet.csv
 rstats
+**/yuri*
+**/data
+**/plots

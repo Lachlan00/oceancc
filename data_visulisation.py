@@ -28,6 +28,9 @@ from mpl_toolkits.basemap import Basemap
 # local modules
 from data_processes import *
 
+# DEBUG
+import pdb
+
 def cmocean2rgb(cmap, n):
     """
     Function to convert cmocean colormaps to be compatible with plotly
@@ -58,7 +61,8 @@ def make_polygon(region, m, edgecolor='#e60000'):
 ###############################################
 # Check box positions relative to ROMS extent #
 ###############################################
-def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn='FIG.png', labels=None, title=None):
+def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn='FIG.png', 
+    labels=None, title=None, zoom2box=False):
     print('\nChecking analysis regions..')
     file_ls = [f for f in listdir(ROMS_directory) if isfile(join(ROMS_directory, f))]
     file_ls = list(filter(lambda x:'.nc' in x, file_ls))
@@ -80,8 +84,12 @@ def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn='FIG
     bath = bath/1000
 
     # setup map
-    m = Basemap(projection='merc', llcrnrlat=lats.min()-1, urcrnrlat=lats.max()+1,\
-        llcrnrlon=lons.min()-1, urcrnrlon=lons.max()+1, lat_ts=20, resolution='h')
+    if zoom2box & (len(box_ls) <= 1):
+        m = Basemap(projection='merc', llcrnrlat=box_ls[0][2] - .2, urcrnrlat=box_ls[0][3] + .2,\
+            llcrnrlon=box_ls[0][0] - .2, urcrnrlon=box_ls[0][1] + .2, lat_ts=20, resolution='h')
+    else:
+        m = Basemap(projection='merc', llcrnrlat=lats.min()-1, urcrnrlat=lats.max()+1,\
+            llcrnrlon=lons.min()-1, urcrnrlon=lons.max()+1, lat_ts=20, resolution='h')
 
     # make plot
     fig = plt.figure(figsize=(8,8))
@@ -109,11 +117,12 @@ def check_boxROMS(box_ls, ROMS_directory, depthmax=1e10, save=False, out_fn='FIG
          plt.gca().add_patch(make_polygon(box_ls[i], m))
 
     # add labels
-    for region, label in zip(box_ls, labels):
-        x, y = m(region[0],region[3]-(region[3]-region[2])/2)
-        x = x - 23000
-        txt = plt.text(x, y, label+' '+u'\u25B6', size=8.5, ha='right', alpha=0.8)
-        txt.set_bbox(dict(facecolor='#e6e6e6', alpha=0.5, edgecolor='#e6e6e6'))
+    if labels is not None:
+        for region, label in zip(box_ls, labels):
+            x, y = m(region[0],region[3]-(region[3]-region[2])/2)
+            x = x - 23000
+            txt = plt.text(x, y, label+' '+u'\u25B6', size=8.5, ha='right', alpha=0.8)
+            txt.set_bbox(dict(facecolor='#e6e6e6', alpha=0.5, edgecolor='#e6e6e6'))
 
     # save plots
     if save:
